@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Admin Complaint Panel</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<style>
+
+body{
+background:#0f172a;
+font-family:Arial;
+color:white;
+padding:40px;
+}
+
+h2{
+margin-bottom:20px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+background:#1e293b;
+}
+
+th,td{
+padding:12px;
+border-bottom:1px solid rgba(255,255,255,0.1);
+font-size:14px;
+}
+
+th{
+background:#334155;
+}
+
+select,input{
+padding:6px;
+}
+
+button{
+padding:6px 10px;
+background:#2563eb;
+color:white;
+border:none;
+cursor:pointer;
+}
+
+</style>
+
+</head>
+
+<body>
+<div style="position:absolute; top:20px; right:40px;">
+    <a href="{{ url_for('admin_dashboard') }}" style="text-decoration:none;">
+        <button style="
+            padding:10px 18px;
+            background:#38bdf8;
+            border:none;
+            border-radius:8px;
+            color:white;
+            font-weight:bold;
+            cursor:pointer;
+        ">
+            ⬅ Back
+        </button>
+    </a>
+</div>
+<h2>Latest Citizen Complaints</h2>
+
+<table>
+
+<tr>
+
+<th>ID</th>
+<th>Type</th>
+<th>Description</th>
+<th>Area</th>
+<th>Date</th>
+<th>Status</th>
+<th>Assign Staff</th>
+<th>Priority</th>
+
+</tr>
+
+{% for c in complaints %}
+
+<tr>
+
+<td>{{ c.complaint_id }}</td>
+
+<td>{{ c.complaint_type }}</td>
+
+<td>{{ c.description }}</td>
+
+<td>{{ c.area_name }}</td>
+
+<td>{{ c.date_submitted }}</td>
+
+<td>
+
+<form action="/update_status/{{ c.complaint_id }}" method="POST">
+
+<select name="status">
+
+<option>Pending</option>
+<option>In Progress</option>
+<option>Resolved</option>
+
+</select>
+
+<button type="submit">Update</button>
+
+</form>
+
+</td>
+
+<td>
+
+<form action="/assign_staff/{{ c.complaint_id }}" method="POST">
+
+<select name="staff_id">
+
+{% for s in staff %}
+
+{% if s.designation == c.complaint_type %}
+
+<option value="{{ s.staff_id }}">
+{{ s.staff_id }} - {{ s.name }}
+</option>
+
+{% endif %}
+
+{% endfor %}
+
+</select>
+
+<button type="submit">Assign</button>
+
+</form>
+
+</td>
+
+
+<td>
+
+<form action="/update_priority/{{ c.complaint_id }}" method="POST">
+
+<select name="priority">
+
+<option value="Low" {% if c.priority == 'Low' %}selected{% endif %}>Low</option>
+<option value="Medium" {% if c.priority == 'Medium' %}selected{% endif %}>Medium</option>
+<option value="High" {% if c.priority == 'High' %}selected{% endif %}>High</option>
+
+</select>
+
+<button type="submit">Set</button>
+
+</form>
+
+</td>
+</tr>
+
+{% endfor %}
+
+</table>
+
+</body>
+</html>

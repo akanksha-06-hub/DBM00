@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Staff Dashboard</title>
+
+<style>
+
+body{
+background:linear-gradient(135deg,#0f172a,#1e293b);
+font-family:Arial;
+margin:0;
+padding:40px;
+color:white;
+}
+
+.container{
+display:flex;
+gap:40px;
+justify-content:center;
+align-items:flex-start;
+}
+
+.card{
+background:#1e293b;
+padding:30px;
+border-radius:12px;
+width:420px;
+box-shadow:0 10px 25px rgba(0,0,0,0.5);
+}
+
+h2{
+text-align:center;
+margin-bottom:20px;
+}
+
+label{
+display:block;
+margin-top:12px;
+font-size:14px;
+}
+
+input,select{
+width:100%;
+padding:10px;
+margin-top:6px;
+border:none;
+border-radius:6px;
+font-size:14px;
+}
+
+button{
+width:100%;
+margin-top:20px;
+padding:12px;
+background:#38bdf8;
+border:none;
+border-radius:8px;
+font-size:16px;
+font-weight:bold;
+color:white;
+cursor:pointer;
+}
+
+button:hover{
+background:#0ea5e9;
+}
+
+.work-box{
+background:#334155;
+padding:15px;
+margin-top:15px;
+border-radius:8px;
+}
+
+.status-active{
+color:#22c55e;
+font-weight:bold;
+}
+
+.status-inactive{
+color:#ef4444;
+font-weight:bold;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div style="position:absolute; top:20px; right:40px;">
+    <a href="/logout" style="text-decoration:none;">
+        <button style="
+            padding:10px 18px;
+            background:#ef4444;
+            border:none;
+            border-radius:8px;
+            color:white;
+            font-weight:bold;
+            cursor:pointer;
+        ">
+            🔓 Logout
+        </button>
+    </a>
+</div>
+
+<div class="container">
+
+<!-- Staff Registration -->
+
+<div class="card">
+
+
+<h2>👨‍🔧 Staff Status</h2>
+<p>ID: {{ staff.staff_id }}</p>
+
+<form action="/update_staff_status/{{ staff.staff_id }}" method="POST">
+
+    <select name="designation" {% if staff.designation %}disabled{% endif %}>
+        <option value="">Select</option>
+        <option value="Cleaner">Garbage Issue</option>
+        <option value="Electrician">Water Problem</option>
+        <option value="Plumber">Road Damage</option>
+    </select>
+
+    {% if staff.designation %}
+    <input type="hidden" name="designation" value="{{ staff.designation }}">
+    {% endif %}
+
+    <select name="status">
+        <option value="Active">Active</option>
+        <option value="Inactive">Inactive</option>
+    </select>
+
+    <button type="submit">Save</button>
+
+</form>
+</div>
+
+
+<!-- Assigned Work Section -->
+
+<div class="card">
+
+<h2>📋 Assigned Work</h2>
+
+<!-- Example Work Box (This will come from database) -->
+
+
+{% for c in complaints %}
+<div class="work-box">
+
+<p><b>Complaint ID:</b> {{ c.complaint_id }}</p>
+<p><b>Issue:</b> {{ c.complaint_type }}</p>
+<p><b>Location:</b> {{ c.area_name }}</p>
+<p><b>Status:</b> 
+<span class="{% if c.status == 'Resolved' %}status-active{% else %}status-inactive{% endif %}">
+{{ c.status }}
+</span>
+</p>
+
+</div>
+{% endfor %}
+
+
+</div>
+
+</div>
+
+</body>
+</html>

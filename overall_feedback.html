@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Overall Feedback</title>
+
+<style>
+
+body{
+background:linear-gradient(135deg,#0f172a,#1e293b);
+font-family:Arial;
+margin:0;
+padding:40px;
+color:white;
+}
+
+h1{
+text-align:center;
+margin-bottom:30px;
+}
+
+.container{
+max-width:1000px;
+margin:auto;
+}
+
+.feedback-card{
+background:#1e293b;
+padding:20px;
+border-radius:12px;
+margin-bottom:20px;
+box-shadow:0 10px 20px rgba(0,0,0,0.4);
+transition:0.3s;
+border-left:5px solid #38bdf8;
+}
+
+.feedback-card:hover{
+transform:scale(1.02);
+}
+
+.top{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:10px;
+}
+
+.name{
+font-size:18px;
+font-weight:bold;
+color:#38bdf8;
+}
+
+.date{
+font-size:13px;
+color:#cbd5f5;
+}
+
+.complaint{
+font-size:14px;
+color:#fbbf24;
+margin-top:5px;
+}
+
+.rating{
+margin-top:8px;
+}
+
+.star{
+color:gold;
+font-size:16px;
+}
+
+.comment{
+margin-top:12px;
+font-size:15px;
+line-height:1.5;
+color:#e2e8f0;
+}
+
+.no-data{
+text-align:center;
+font-size:18px;
+color:#94a3b8;
+margin-top:50px;
+}
+
+</style>
+
+</head>
+
+<body>
+    
+
+<h1>🌟 Overall Citizen Feedback</h1>
+
+<div class="container">
+
+{% if feedbacks %}
+
+    {% for f in feedbacks %}
+
+    <div class="feedback-card">
+
+        <div class="top">
+            <div class="name">{{ f.citizen_name }}</div>
+            <div class="date">{{ f.date }}</div>
+        </div>
+
+        <!-- Complaint Type -->
+        <div class="complaint">
+            📌 Complaint: {{ f.complaint_type }}
+        </div>
+
+        <!-- Rating Stars -->
+        <div class="rating">
+            {% for i in range(f.rating) %}
+                <span class="star">★</span>
+            {% endfor %}
+        </div>
+
+        <!-- Comment -->
+        <div class="comment">
+            "{{ f.comment }}"
+        </div>
+
+    </div>
+
+    {% endfor %}
+
+{% else %}
+
+    <div class="no-data">No feedback available</div>
+
+{% endif %}
+
+</div>
+
+</body>
+</html>

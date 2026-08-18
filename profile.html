@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Profile — SmartCity</title>
+
+<!-- SmartCity CSS -->
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+</head>
+
+<body>
+
+<!-- Background Effects -->
+<div class="bg-grid"></div>
+<div class="bg-glow-1"></div>
+<div class="bg-glow-2"></div>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="index.html" class="nav-brand">
+      <div class="nav-brand-icon">🏙</div>
+      <div class="nav-brand-text">
+        <div class="brand-main">SmartCity</div>
+        <div class="brand-sub">Management System</div>
+      </div>
+    </a>
+
+    <div class="nav-links">
+      <a href="{{ url_for('dashboard') }}">Dashboard</a>
+      
+    </div>
+
+    <div class="nav-actions">
+      <a href="{{ url_for('citizen_login') }}" class="btn-nav-login">Logout</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Page Header -->
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="page-hero-badge">👤 Profile</div>
+    <h1>Edit Profile</h1>
+    <p>Update your personal details and account information.</p>
+  </div>
+</div>
+
+<!-- Main Section -->
+<div class="page-section">
+  <div class="section-inner">
+
+    <div class="form-card wide">
+
+      <!-- Username Display -->
+      <h2 class="form-title">{{ user.username }}</h2>
+      <p class="form-subtitle">Manage your account details</p>
+
+      <!-- Form -->
+      <form action="{{ url_for('update_profile') }}" method="POST">
+
+        <!-- Username -->
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <div class="input-wrapper">
+            <input type="text" name="username" class="form-input" value="{{ user.username }}">
+          </div>
+        </div>
+
+        <!-- Name -->
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <div class="input-wrapper">
+            <input type="text" name="name" class="form-input" value="{{ user.name }}">
+          </div>
+        </div>
+
+        <!-- Phone -->
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <div class="input-wrapper">
+            <input type="text" name="phone" class="form-input" value="{{ user.phone }}">
+          </div>
+        </div>
+
+        <!-- Address -->
+        <div class="form-group">
+          <label class="form-label">Address</label>
+          <div class="input-wrapper">
+            <textarea name="address" class="form-textarea">{{ user.address }}</textarea>
+          </div>
+        </div>
+
+        <!-- City -->
+        <div class="form-group">
+          <label class="form-label">City</label>
+          <div class="input-wrapper">
+            <input type="text" name="city" class="form-input" value="{{ user.city }}">
+          </div>
+        </div>
+
+        <!-- Pincode -->
+        <div class="form-group">
+          <label class="form-label">Pincode</label>
+          <div class="input-wrapper">
+            <input type="text" name="pincode" class="form-input" value="{{ user.pincode }}">
+          </div>
+        </div>
+
+        <br>
+
+        <!-- Buttons -->
+        
+
+      </form>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-brand">SmartCity</div>
+  <p>© 2025 SmartCity Management System</p>
+</footer>
+
+</body>
+</html>

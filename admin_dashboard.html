@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard — SmartCity</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    .dashboard-layout { display: grid; grid-template-columns: 260px 1fr; min-height: calc(100vh - 68px); }
+
+    /* Sidebar */
+    .sidebar {
+      background: rgba(5,15,31,0.9); border-right: 1px solid var(--glass-border);
+      padding: 28px 16px; position: sticky; top: 68px;
+      height: calc(100vh - 68px); overflow-y: auto;
+    }
+    .sidebar-user {
+      display: flex; align-items: center; gap: 12px;
+      padding: 16px; background: rgba(14,165,233,0.08);
+      border: 1px solid var(--glass-border); border-radius: var(--radius-md);
+      margin-bottom: 24px;
+    }
+    .user-avatar {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--sky-500), var(--cyan-400));
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display); font-size: 18px; font-weight: 800; color: var(--navy-900);
+      flex-shrink: 0;
+    }
+    .user-info .user-name { font-weight: 700; font-size: 14px; color: var(--white); }
+    .user-info .user-role { font-size: 12px; color: var(--sky-400); }
+
+    .sidebar-label { font-size: 11px; font-weight: 700; color: var(--gray-600); letter-spacing: 1.5px; text-transform: uppercase; margin: 20px 12px 8px; }
+
+    .sidebar-link {
+      display: flex; align-items: center; gap: 12px;
+      padding: 11px 14px; border-radius: var(--radius-sm);
+      text-decoration: none; color: var(--gray-400); font-size: 14px; font-weight: 500;
+      transition: var(--transition); margin-bottom: 2px;
+    }
+    .sidebar-link i { width: 18px; text-align: center; font-size: 14px; }
+    .sidebar-link:hover { color: var(--sky-400); background: rgba(14,165,233,0.08); }
+    .sidebar-link.active { color: var(--sky-400); background: rgba(14,165,233,0.12); border-left: 2px solid var(--sky-500); }
+    .sidebar-link .badge-pill {
+      margin-left: auto; background: var(--red-500); color: #fff;
+      font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 100px;
+    }
+
+    /* Main Content */
+    .dash-content { padding: 32px; overflow-y: auto; }
+
+    .dash-header { margin-bottom: 28px; }
+    .dash-header h1 {
+      font-family: var(--font-display); font-size: 28px; font-weight: 800; color: var(--white);
+    }
+    .dash-header p { font-size: 14px; color: var(--gray-400); margin-top: 4px; }
+
+    /* Stats Grid */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+
+    /* Quick Actions */
+    .quick-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px; }
+    .quick-card {
+      background: var(--glass-bg); backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border); border-radius: var(--radius-lg);
+      padding: 22px 20px; transition: var(--transition); text-decoration: none;
+      display: flex; align-items: center; gap: 16px;
+    }
+    .quick-card:hover { border-color: rgba(14,165,233,0.35); transform: translateY(-3px); box-shadow: var(--shadow-card); }
+    .quick-icon {
+      width: 50px; height: 50px; border-radius: var(--radius-sm); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 22px;
+    }
+    .quick-card .quick-text h4 { font-family: var(--font-display); font-size: 15px; font-weight: 700; color: var(--white); margin-bottom: 3px; }
+    .quick-card .quick-text p { font-size: 12px; color: var(--gray-400); }
+
+    /* Recent Activity */
+    .two-col-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; }
+    .panel-card {
+      background: var(--glass-bg); backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border); border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .panel-header {
+      padding: 18px 22px; border-bottom: 1px solid var(--glass-border);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .panel-header h3 { font-family: var(--font-display); font-size: 15px; font-weight: 700; color: var(--white); }
+    .panel-body { padding: 8px 0; }
+
+    .activity-item {
+      display: flex; align-items: center; gap: 14px;
+      padding: 12px 22px; transition: var(--transition);
+    }
+    .activity-item:hover { background: rgba(14,165,233,0.04); }
+    .activity-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .activity-dot.blue { background: var(--sky-400); }
+    .activity-dot.green { background: var(--green-400); }
+    .activity-dot.orange { background: var(--orange-400); }
+    .activity-dot.red { background: var(--red-400); }
+    .activity-text { flex: 1; }
+    .activity-text .at-title { font-size: 13px; color: var(--white); font-weight: 500; }
+    .activity-text .at-time { font-size: 12px; color: var(--gray-600); margin-top: 2px; }
+    .activity-status { flex-shrink: 0; }
+
+    .util-item { padding: 16px 22px; border-bottom: 1px solid rgba(14,165,233,0.06); }
+    .util-item:last-child { border-bottom: none; }
+    .util-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .util-top span { font-size: 13px; color: var(--gray-300); font-weight: 500; }
+    .util-top strong { font-size: 13px; color: var(--white); font-weight: 700; }
+
+    @media (max-width: 1100px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .two-col-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 900px) {
+      .dashboard-layout { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .quick-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 540px) {
+      .quick-grid { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .dash-content { padding: 20px 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="bg-glow-1"></div>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="navbar-inner">
+       
+          <a href="{{ url_for('index') }}" class="nav-brand">
+        <div class="nav-brand-icon">🏙</div>
+        <div class="nav-brand-text">
+          <div class="brand-main">SmartCity</div>
+          <div class="brand-sub">Management System</div>
+        </div>
+      </a>
+      <div class="nav-links">
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+
+<a href="{{ url_for('admin_complaint') }}">Complaints</a>
+<a href="{{ url_for('overall_feedback') }}">Overall_Feedback</a>
+<a href="{{ url_for('admin_staff') }}">staff</a>
+      </div>
+      <div class="nav-actions">
+        <span style="font-size:13px; color:var(--sky-400); font-weight:600;"><i class="fas fa-user-circle" style="margin-right:6px;"></i>Admin</span>
+        <a href="/citizen_login" class="btn-nav-login"><i class="fas fa-sign-out-alt"></i> Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dashboard-layout" style="position:relative; z-index:1;">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-user">
+        <div class="user-avatar">A</div>
+        <div class="user-info">
+          <div class="user-name">Admin</div>
+          <div class="user-role">Admin · Verified</div>
+        </div>
+      </div>
+
+      <div class="sidebar-label">Main Menu</div>
+      
+        <a href="{{ url_for('dashboard') }}" class="sidebar-link active"><i class="fas fa-th-large"></i> Dashboard</a>
+ 
+        <a href="{{ url_for('admin_complaint') }}" class="sidebar-link"><i class="fas fa-comment-dots"></i> all_Complaints <span class="badge-pill">3</span></a>
+      
+        <a href="{{ url_for('overall_feedback') }}" class="sidebar-link"><i class="fas fa-cogs"></i> Overall_Feedback</a>
+    
+        <a href="{{ url_for('admin_staff') }}" class="sidebar-link"><i class="fas fa-bus"></i> staff</a>
+      
+        
+      
+
+      <div class="sidebar-label">Account</div>
+      <a href="/admin_profile" class="sidebar-link"><i class="fas fa-user-edit"></i> Edit Profile</a>
+      <a href="/forget_password" class="sidebar-link"><i class="fas fa-key"></i> Change Password</a>
+      <a href="/citizen_login" class="sidebar-link" style="color:var(--red-400);"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="dash-content">
+      <div class="dash-header animate-fade-up">
+        <h1>Heyyy , Admin 👋</h1>
+        <p>Here's what's happening in your city today !!! 2026</p>
+      </div>
+
+      <!-- STATS -->
+      <div class="stats-grid animate-fade-up-1">
+        <div class="stat-card">
+          <div class="stat-icon blue"><i class="fas fa-comment-dots" style="color:var(--sky-400)"></i></div>  
+          <div  class="stat-value">{{ total_complaints }}</div> 
+          
+          <div class="stat-change up"><i class="fas fa-arrow-up"></i> Total Complaints</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green"><i class="fas fa-check-circle" style="color:var(--green-400)"></i></div>
+          <div class="stat-value">{{ resolved }}</div>
+         
+          <div class="stat-change up"><i class="fas fa-arrow-up"></i> Resolved _Complaints </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon orange"><i class="fas fa-cogs" style="color:var(--orange-400)"></i></div>
+          <div class="stat-value">{{ active_staff }}</div>
+          
+          <div class="stat-change" style="color:var(--gray-400)">Active Staff</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon red"><i class="fas fa-exclamation-triangle" style="color:var(--red-400)"></i></div>
+                <div class="stat-value">{{ total_feedback }}
+            </div>
+          <div class="stat-change down"><i class="fas fa-arrow-down"></i> Feedback</div>
+          
+        </div>
+      </div>
+
+      <!-- QUICK ACTIONS -->
+      <div class="section-header animate-fade-up-2">
+        <h2>Quick Actions</h2>
+        <p>Access the most common city services</p>
+      </div>
+
+      <div class="quick-grid animate-fade-up-2">
+    
+          <a href="{{ url_for('admin_complaint') }}" class="quick-card">
+          <div class="quick-icon" style="background:rgba(14,165,233,0.12); border:1px solid rgba(14,165,233,0.2);">
+            <i class="fas fa-comment-dots" style="color:var(--sky-400)"></i>
+          </div>
+          <div class="quick-text"><h4>Register Complaint</h4><p>Report water, road, electricity issues</p></div>
+        </a>
+     
+          <a href="{{ url_for('forget_password') }}" class="quick-card">
+          <div class="quick-icon" style="background:rgba(248,113,113,0.12); border:1px solid rgba(248,113,113,0.2);">
+            <i class="fas fa-ambulance" style="color:var(--red-400)"></i>
+          </div>
+          <div class="quick-text"><h4>Change_password</h4><p>Police · Hospital · Fire</p></div>
+        </a>
+        
+    
+            <a href="{{ url_for('overall_feedback') }}" class="quick-card">
+          <div class="quick-icon" style="background:rgba(74,222,128,0.12); border:1px solid rgba(74,222,128,0.2);">
+            <i class="fas fa-cogs" style="color:var(--green-400)"></i>
+          </div>
+          <div class="quick-text"><h4>Overall_feedback</h4><p>Apply for city facilities</p></div>
+        </a>
+        
+          <a href="{{ url_for('admin_staff') }}" class="quick-card">
+          <div class="quick-icon" style="background:rgba(250,204,21,0.12); border:1px solid rgba(250,204,21,0.2);">
+            <i class="fas fa-bus" style="color:var(--yellow-400)"></i>
+          </div>
+          <div class="quick-text"><h4>active_staff</h4><p>Routes, passes & schedules</p></div>
+        </a>
+        
+          <a href="{{ url_for('admin_login') }}" class="quick-card">
+          <div class="quick-icon" style="background:rgba(167,139,250,0.12); border:1px solid rgba(167,139,250,0.2);">
+            <i class="fas fa-bolt" style="color:#A78BFA"></i>
+          </div>
+          <div class="quick-text"><h4>Log_Out</h4><p>Water & electricity usage</p></div>
+        </a>
+       
+          <a href="{{ url_for('admin_profile') }}" class="quick-card">
+            
+          <div class="quick-icon" style="background:rgba(34,211,238,0.12); border:1px solid rgba(34,211,238,0.2);">
+            <i class="fas fa-user-edit" style="color:var(--cyan-400)"></i>
+          </div>
+          <div class="quick-text"><h4>Edit Profile</h4><p>Update your citizen details</p></div>
+        </a>
+      </div>
+
+      <!-- RECENT ACTIVITY + UTILITIES -->
+   
+        <div class="full-width animate-fade-up-3">
+
+        <div class="panel-card">
+          <div class="panel-header">
+            <h3><i class="fas fa-history" style="color:var(--sky-400); margin-right:8px;"></i> Recent Complaints</h3>
+ 
+            
+            <a href="{{ url_for('admin_complaint') }}" class="form-link" style="font-size:13px;">View All</a>
+          </div>
+          <div class="panel-body">
+
+{% if complaints %}
+
+  {% for c in complaints %}
+
+  <div class="activity-item">
+
+    <!-- Status Color -->
+    <div class="activity-dot 
+      {% if c.status == 'Resolved' %}green
+      {% elif c.status == 'Pending' %}orange
+      {% else %}blue
+      {% endif %}
+    "></div>
+
+    <div class="activity-text">
+      <div class="at-title">{{ c.description }}</div>
+      <div class="at-time">
+        {{ c.date_submitted }} · {{ c.complaint_type }}
+      </div>
+    </div>
+
+    <!-- Status Badge -->
+    <span class="badge
+      {% if c.status == 'Resolved' %}badge-green
+      {% elif c.status == 'Pending' %}badge-orange
+      {% else %}badge-blue
+      {% endif %}
+    ">
+      {{ c.status }}
+    </span>
+
+  </div>
+
+  {% endfor %}
+
+{% else %}
+
+  <div style="padding:20px; text-align:center; color:gray;">
+    No complaints found
+  </div>
+
+{% endif %}
+
+</div>
+        </div>
+
+       
+            
+
+      </div>
+
+    </main>
+  </div>
+
+  <footer class="footer">
+    <p>© 2026 SmartCity Management System — 
+    
+    <a href="{{ url_for('admin_login') }}">Home</a>
+  </p>
+  </footer>
+</body>
+</html>

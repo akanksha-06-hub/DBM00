@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Login — SmartCity</title>
+ 
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    .auth-main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 24px; position: relative; z-index: 1; min-height: calc(100vh - 68px); }
+
+    .admin-auth-layout {
+      display: grid; grid-template-columns: 1fr 1fr;
+      max-width: 980px; width: 100%;
+      background: rgba(10,18,36,0.8);
+      backdrop-filter: blur(28px);
+      border: 1px solid rgba(167,139,250,0.25);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      box-shadow: var(--shadow-card), 0 0 80px rgba(139,92,246,0.12);
+    }
+
+    .admin-left {
+      background: linear-gradient(145deg, rgba(139,92,246,0.2) 0%, rgba(5,12,28,0.96) 100%);
+      border-right: 1px solid rgba(167,139,250,0.2);
+      padding: 48px 36px;
+      display: flex; flex-direction: column; justify-content: center;
+      position: relative; overflow: hidden;
+    }
+    .admin-left::before {
+      content: ''; position: absolute; top: -80px; right: -80px;
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(139,92,246,0.2), transparent 70%);
+    }
+    .admin-left::after {
+      content: ''; position: absolute; bottom: -60px; left: -60px;
+      width: 220px; height: 220px;
+      background: radial-gradient(circle, rgba(99,102,241,0.15), transparent 70%);
+    }
+
+    /* Admin Avatar Upload */
+    .admin-avatar-section {
+      display: flex; flex-direction: column; align-items: center;
+      margin-bottom: 24px; position: relative; z-index: 1;
+    }
+    .admin-avatar-container { position: relative; width: 92px; height: 92px; cursor: pointer; }
+    .admin-avatar-preview {
+      width: 92px; height: 92px; border-radius: 50%;
+      background: linear-gradient(135deg, #7C3AED, #6366F1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 34px; overflow: hidden;
+      border: 3px solid rgba(139,92,246,0.55);
+      box-shadow: 0 0 28px rgba(139,92,246,0.4);
+      transition: var(--transition);
+    }
+    .admin-avatar-preview img { width: 100%; height: 100%; object-fit: cover; }
+    .admin-avatar-edit {
+      position: absolute; bottom: 0; right: 0;
+      width: 28px; height: 28px;
+      background: #7C3AED; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; color: white; cursor: pointer;
+      border: 2px solid var(--navy-900); transition: var(--transition);
+    }
+    .admin-avatar-edit:hover { background: #6366F1; transform: scale(1.1); }
+    #adminAvatarInput { display: none; }
+    .admin-avatar-label { font-size: 12px; color: var(--gray-400); margin-top: 8px; text-align: center; }
+    .admin-avatar-label span { color: #A78BFA; cursor: pointer; }
+
+    .admin-badge {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: rgba(139,92,246,0.15); border: 1px solid rgba(139,92,246,0.3);
+      color: #C4B5FD; font-size: 11px; font-weight: 700;
+      padding: 5px 12px; border-radius: 100px; letter-spacing: 1px;
+      text-transform: uppercase; margin-bottom: 16px; width: fit-content;
+    }
+    .admin-badge i { font-size: 10px; }
+
+    .admin-left h2 { font-family: var(--font-display); font-size: 26px; font-weight: 800; color: var(--white); line-height: 1.25; margin-bottom: 10px; }
+    .admin-left h2 span { color: #A78BFA; }
+    .admin-left p { font-size: 13px; color: var(--gray-400); line-height: 1.7; margin-bottom: 24px; }
+
+    .admin-perms { display: flex; flex-direction: column; gap: 11px; margin-bottom: 24px; }
+    .admin-perm { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--gray-300); }
+    .admin-perm i { color: #A78BFA; width: 16px; font-size: 12px; }
+
+    .citizen-link-hint {
+      padding: 11px 14px;
+      background: rgba(14,165,233,0.08); border: 1px solid rgba(14,165,233,0.2);
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; gap: 9px;
+      font-size: 13px; color: var(--gray-400);
+    }
+    .citizen-link-hint i { color: var(--sky-400); }
+    .citizen-link-hint a { color: var(--sky-400); text-decoration: none; font-weight: 600; }
+    .citizen-link-hint a:hover { color: var(--cyan-400); }
+
+    .admin-right { padding: 48px 38px; display: flex; flex-direction: column; justify-content: center; }
+    .admin-right .form-title { font-size: 24px; text-align: left; color: var(--white); -webkit-text-fill-color: var(--white); margin-bottom: 4px; }
+    .admin-right .form-subtitle { text-align: left; margin-bottom: 24px; color: var(--gray-400); font-size: 14px; }
+
+    /* Purple themed inputs for admin */
+    .admin-input-wrapper {
+      position: relative; display: flex; align-items: center;
+    }
+    .admin-input {
+      width: 100%; background: rgba(30,20,60,0.5);
+      border: 1px solid rgba(139,92,246,0.3); border-radius: var(--radius-sm);
+      padding: 13px 16px 13px 44px;
+      font-family: var(--font-body); font-size: 14px; color: var(--white);
+      transition: var(--transition); outline: none;
+    }
+    .admin-input::placeholder { color: var(--gray-600); }
+    .admin-input:focus { border-color: #7C3AED; box-shadow: 0 0 0 3px rgba(124,58,237,0.15); }
+    .admin-input-icon {
+      position: absolute; left: 15px; color: #A78BFA; font-size: 15px; pointer-events: none;
+    }
+    .admin-input-right {
+      position: absolute; right: 15px; color: var(--gray-600); font-size: 14px;
+    }
+
+    .admin-form-group { margin-bottom: 18px; }
+    .admin-form-label { display: block; font-size: 13px; font-weight: 600; color: var(--gray-300); margin-bottom: 7px; }
+
+    /* Role selector */
+    .role-select-group { margin-bottom: 18px; }
+    .role-select {
+      width: 100%; background: rgba(30,20,60,0.5);
+      border: 1px solid rgba(139,92,246,0.3); border-radius: var(--radius-sm);
+      padding: 13px 16px; font-family: var(--font-body); font-size: 14px;
+      color: var(--white); outline: none; cursor: pointer;
+      transition: var(--transition); appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23A78BFA' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 14px center;
+    }
+    .role-select option { background: #0A0E1A; color: var(--white); }
+    .role-select:focus { border-color: #7C3AED; box-shadow: 0 0 0 3px rgba(124,58,237,0.15); }
+
+    /* 2FA section */
+    .twofa-section {
+      padding: 14px 16px;
+      background: rgba(139,92,246,0.07); border: 1px solid rgba(139,92,246,0.18);
+      border-radius: var(--radius-sm); margin-bottom: 18px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .twofa-left { display: flex; align-items: center; gap: 10px; }
+    .twofa-left i { color: #A78BFA; font-size: 15px; }
+    .twofa-left-text .twofa-title { font-size: 13px; font-weight: 600; color: var(--white); }
+    .twofa-left-text .twofa-sub { font-size: 12px; color: var(--gray-400); }
+    .toggle-switch { position: relative; width: 42px; height: 23px; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; cursor: pointer; inset: 0;
+      background: rgba(139,92,246,0.2); border: 1px solid rgba(139,92,246,0.3);
+      border-radius: 100px; transition: var(--transition);
+    }
+    .toggle-slider::before {
+      content: ''; position: absolute; width: 16px; height: 16px;
+      left: 3px; top: 50%; transform: translateY(-50%);
+      background: var(--gray-400); border-radius: 50%; transition: var(--transition);
+    }
+    .toggle-switch input:checked + .toggle-slider { background: #7C3AED; border-color: #7C3AED; }
+    .toggle-switch input:checked + .toggle-slider::before { background: white; transform: translate(18px, -50%); }
+
+    .admin-form-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .admin-remember { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--gray-400); cursor: pointer; }
+    .admin-remember input { accent-color: #7C3AED; width: 15px; height: 15px; }
+
+    .btn-admin {
+      display: flex; align-items: center; justify-content: center; gap: 9px;
+      width: 100%; padding: 14px 20px;
+      background: linear-gradient(135deg, #7C3AED, #6366F1);
+      color: white; border: none; border-radius: var(--radius-sm);
+      font-family: var(--font-display); font-size: 15px; font-weight: 700;
+      cursor: pointer; transition: var(--transition);
+      box-shadow: 0 4px 20px rgba(124,58,237,0.35);
+    }
+    .btn-admin:hover { background: linear-gradient(135deg, #6D28D9, #4F46E5); transform: translateY(-1px); box-shadow: 0 6px 28px rgba(124,58,237,0.45); }
+
+    .error-msg {
+      display: none; padding: 10px 14px;
+      background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3);
+      border-radius: var(--radius-sm); font-size: 13px; color: var(--red-400);
+      margin-bottom: 14px; align-items: center; gap: 8px;
+    }
+    .error-msg.show { display: flex; }
+
+    .security-notice {
+      margin-top: 18px; padding: 11px 14px;
+      background: rgba(250,204,21,0.06); border: 1px solid rgba(250,204,21,0.15);
+      border-radius: var(--radius-sm);
+      display: flex; align-items: flex-start; gap: 9px;
+      font-size: 12px; color: var(--gray-400); line-height: 1.5;
+    }
+    .security-notice i { color: var(--yellow-400); margin-top: 1px; flex-shrink: 0; }
+
+    @media (max-width: 720px) {
+      .admin-auth-layout { grid-template-columns: 1fr; }
+      .admin-left { display: none; }
+      .admin-right { padding: 36px 28px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="bg-glow-1" style="background: radial-gradient(ellipse at 70% 0%, rgba(139,92,246,0.18) 0%, transparent 60%);"></div>
+  <div class="bg-glow-2"></div>
+
+  <nav class="navbar">
+    <div class="navbar-inner">
+        <a href="{{ url_for('index') }}" class="nav-brand">
+        <div class="nav-brand-icon">🏙</div>
+        <div class="nav-brand-text">
+          <div class="brand-main">SmartCity</div>
+          <div class="brand-sub">Management System</div>
+        </div>
+      </a>
+      <div class="nav-actions">
+      <a href="{{ url_for('citizen_login') }}" class="btn-nav-login">Citizen Login</a>
+      <a href="{{ url_for('citizen_register') }}" class="btn-nav-register">Register</a>
+    </div>
+    </div>
+  </nav>
+
+  <main class="auth-main">
+    <div class="admin-auth-layout animate-fade-up">
+
+      <!-- Left Panel -->
+      <div class="admin-left">
+        <div class="admin-avatar-section">
+          <div class="admin-avatar-container" onclick="document.getElementById('adminAvatarInput').click()">
+            <div class="admin-avatar-preview" id="adminAvatarPreview">
+              <span>🛡️</span>
+            </div>
+            <div class="admin-avatar-edit"><i class="fas fa-camera"></i></div>
+          </div>
+          <input type="file" id="adminAvatarInput" accept="image/*" onchange="previewAdminAvatar(event)"/>
+          <div class="admin-avatar-label">
+            <span onclick="document.getElementById('adminAvatarInput').click()">Upload admin photo</span>
+          </div>
+        </div>
+
+        <div class="admin-badge"><i class="fas fa-user-shield"></i> Admin Access</div>
+        <h2>SmartCity <span>Control Panel</span></h2>
+        <p>Restricted area. Authorized administrators only. All actions are logged and audited.</p>
+
+        <div class="admin-perms">
+          <div class="admin-perm"><i class="fas fa-chart-line"></i> Full analytics & reports</div>
+          <div class="admin-perm"><i class="fas fa-users-cog"></i> Citizen account management</div>
+          <div class="admin-perm"><i class="fas fa-tools"></i> City infrastructure control</div>
+          <div class="admin-perm"><i class="fas fa-bell"></i> Monitor and resolve complaints</div>
+          <div class="admin-perm"><i class="fas fa-database"></i> System configuration access</div>
+        </div>
+
+        <div class="citizen-link-hint">
+          <i class="fas fa-user"></i>
+          <span>Are you a citizen? <a href="{{ url_for('citizen_login') }}">Citizen Login &rarr;</a></span>
+        </div>
+      </div>
+
+      <!-- Right Panel -->
+      <div class="admin-right">
+        <p style="margin-top:20px">
+No admin account?
+<a href="{{ url_for('admin_register') }}">Register here</a>
+</p>
+        <h2 class="form-title">Admin Sign In</h2>
+        <p class="form-subtitle">Secure administrative access only</p>
+
+        <div class="error-msg" id="errorMsg">
+          <i class="fas fa-exclamation-circle"></i>
+          <span id="errorText">Invalid admin credentials. Access denied.</span>
+        </div>
+
+          <form action="/admin_login" method="POST">
+          <!-- Role Selector -->
+          <div class="role-select-group">
+            <label class="admin-form-label">Admin Role</label>
+              <select class="role-select" name="role" id="adminRole">
+              <option value="superadmin">⚡ Admin</option>
+              <option value="citymanager">🏛️ Staff</option>
+              
+            </select>
+          </div>
+
+          <div class="admin-form-group">
+            <label class="admin-form-label">Admin ID / Username</label>
+            <div class="admin-input-wrapper">
+              <i class="fas fa-id-badge admin-input-icon"></i>
+              <input type="text" name="username" class="admin-input" placeholder="Enter admin username" required>
+            </div>
+          </div>
+
+          <div class="admin-form-group">
+            <label class="admin-form-label">Password</label>
+            <div class="admin-input-wrapper">
+              <i class="fas fa-lock admin-input-icon"></i>
+              <input type="password" id="adminPassword" name="password" class="admin-input" placeholder="Enter admin password" required>
+              <i class="fas fa-eye admin-input-right" onclick="toggleAdminPwd()" id="adminEyeIcon" style="cursor:pointer;"></i>
+            </div>
+          </div>
+
+          
+
+          <!-- 2FA Code Input (hidden by default) -->
+
+          <div class="admin-form-row">
+            <label class="admin-remember">
+              <input type="checkbox" /> Trusted device
+            </label>
+            <a href="{{ url_for('forget_password') }}" class="form-link" style="font-size:13px; color: #A78BFA;">Forgot Password?</a>
+          </div>
+
+          <button type="submit" class="btn-admin">
+            <i class="fas fa-shield-alt"></i> Secure Admin Access
+          </button>
+        </form>
+
+        <div class="security-notice">
+          <i class="fas fa-exclamation-triangle"></i>
+          <span>Unauthorized access attempts are logged. This system is monitored 24/7 for security compliance.</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    function toggleAdminPwd() {
+      const inp = document.getElementById('adminPassword');
+      const icon = document.getElementById('adminEyeIcon');
+      if (inp.type === 'password') { inp.type = 'text'; icon.classList.replace('fa-eye', 'fa-eye-slash'); }
+      else { inp.type = 'password'; icon.classList.replace('fa-eye-slash', 'fa-eye'); }
+    }
+
+    function previewAdminAvatar(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const preview = document.getElementById('adminAvatarPreview');
+        preview.innerHTML = '<img src="' + e.target.result + '" alt="Admin Avatar"/>';
+      };
+      reader.readAsDataURL(file);
+    }
+  </script>
+</body>
+</html>
